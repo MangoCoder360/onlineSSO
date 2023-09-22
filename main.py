@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+import json
 
 import requests
 from flask import Flask, session, abort, redirect, request, render_template
@@ -17,6 +18,9 @@ USE_PROD_DOMAIN = True
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 GOOGLE_CLIENT_ID = "107748350992-6cidfs1km016ts31sop66u76dc78nlfr.apps.googleusercontent.com"
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "env/client_secret.json")
+
+with open("services.json", 'r') as file:
+    SERVICES = json.load(file)
 
 if USE_PROD_DOMAIN:
     flow = Flow.from_client_secrets_file(
@@ -65,12 +69,25 @@ def login():
     session["state"] = state
     return redirect(authorization_url)
 
-@app.route("/")
+@app.route("/authorize/<service>/<callbackURL>")
+def authorize(service,callbackURL):
+    global SERVICES
+    if service in SERVICES and callbackURL in SERVICES[service]["callbackURLs"]:
+        response = render_template("login.html",service_name=SERVICES[service]["name"])
+        return response
+    else:
+        return 400
+
+@app.route("/debug")
 def protected_area():
     if "email" in session:
         return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a><br><br>{session['email']}"
     else:
         return redirect("/googleoauth")
+    
+@app.route("/")
+def index():
+    return "Backend API. Not for public use."
 
 
 if __name__ == "__main__":

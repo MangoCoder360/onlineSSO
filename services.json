@@ -1,0 +1,10 @@
+{
+    "demo":{
+        "name":"onlineSSO Demo",
+        "callbackURLs":["onlinesso.reuben.zip"]
+    },
+    "cr_admin_panel":{
+        "name":"CubeRacers Admin",
+        "callbackURLs":["admin.cuberacers.com"]
+    }
+}
